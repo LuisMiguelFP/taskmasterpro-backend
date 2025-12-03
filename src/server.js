@@ -16,26 +16,30 @@ dotenv.config();
 const app = express();
 
 // ----------------------------------------------------
-// ⚠️ CONFIGURACIÓN CORS TEMPORAL (MODO DEPURACIÓN) ⚠️
+// ✅ CORS CONFIGURACIÓN SEGURA BASADA EN ENV ✅
 // ----------------------------------------------------
+const frontendUrls = process.env.FRONTEND_URL;
 
-// Esta configuración permite peticiones desde CUALQUIER ORIGEN (origin: '*')
-// y es útil para verificar si el error de CORS se debe a una mala
-// configuración de la variable de entorno 'FRONTEND_URL'.
-// 
-// UNA VEZ RESUELTO EL PROBLEMA, DEBE VOLVERSE A LA CONFIGURACIÓN SEGURA.
-const corsOptionsTemp = {
-    origin: '*', // Permite todos los orígenes
-    credentials: true, // Importante para manejar cookies/tokens
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Asegura que OPTIONS esté incluido para el preflight
+const allowedOrigins = frontendUrls 
+  ? frontendUrls.split(',').map(url => url.trim()).filter(Boolean) 
+  : []; 
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.log(`❌ Origen Bloqueado por CORS: ${origin}. Lista permitida: ${allowedOrigins.join(', ')}`);
+            callback(new Error('Not allowed by CORS'), false);
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
-// 4. Aplica el middleware CORS con las opciones temporales.
-app.use(cors(corsOptionsTemp));
-
+app.use(cors(corsOptions));
 // ----------------------------------------------------
-// ----------------------------------------------------
-
 
 app.use(express.json());
 
@@ -48,32 +52,47 @@ app.use("/api/auth", authRoutes);
 app.use("/api/items", itemRoutes);
 
 app.get("/", (req, res) => {
-    res.json({ message: "Servidor funcionando correctamente 🚀" });
+    res.json({ message: "Servidor funcionando correctamente 🚀" });
 });
+
+// ----------------------------------------------------
+// 🔥 MANEJADOR DE RUTAS NO ENCONTRADAS (404 JSON) 🔥
+// Si Express llega a este punto, significa que ninguna ruta coincidió.
+app.use((req, res) => {
+    // Aseguramos que cualquier error 404 en /api/* devuelva JSON y no HTML.
+    if (req.originalUrl.startsWith('/api')) {
+        return res.status(404).json({ 
+            message: `Ruta de API no encontrada: ${req.method} ${req.originalUrl}. Verifica la URL.` 
+        });
+    }
+    // Para cualquier otra ruta que no sea API, devolvemos un 404 simple.
+    res.status(404).json({ message: "Recurso no encontrado" });
+});
+// ----------------------------------------------------
+
 
 // Puerto
 const PORT = process.env.PORT || 5001;
 
 // ------------- SINCRONIZACIÓN ------------------
 (async () => {
-    try {
-        const FORCE_DB = process.env.FORCE_DB === "true";
+    try {
+        const FORCE_DB = process.env.FORCE_DB === "true";
 
-        await sequelize.sync({ force: FORCE_DB });
+        await sequelize.sync({ force: FORCE_DB });
 
-        if (FORCE_DB) {
-            console.log("🔥 Tablas REGENERADAS (FORCE = TRUE)");
-        } else {
-            console.log("✅ Base de datos sincronizada (sin borrar tablas).");
-        }
+        if (FORCE_DB) {
+            console.log("🔥 Tablas REGENERADAS (FORCE = TRUE)");
+        } else {
+            console.log("✅ Base de datos sincronizada (sin borrar tablas).");
+        }
 
-        // 🔥 CORRECCIÓN ADICIONAL PARA DEPLOY EN RAILWAY (bindeando a 0.0.0.0)
-        // Railway (y otros servicios en la nube) asignan dinámicamente el puerto.
-        app.listen(PORT, "0.0.0.0", () => {
-            console.log(`🚀 Servidor corriendo en http://0.0.0.0:${PORT}`);
-        });
+        // 🔥 CORRECCIÓN ADICIONAL PARA DEPLOY EN RAILWAY (bindeando a 0.0.0.0)
+        app.listen(PORT, "0.0.0.0", () => {
+            console.log(`🚀 Servidor corriendo en http://0.0.0.0:${PORT}`);
+        });
 
-    } catch (error) {
-        console.error("❌ Error al conectar con la base de datos:", error);
-    }
+    } catch (error) {
+        console.error("❌ Error al conectar con la base de datos:", error);
+    }
 })();
