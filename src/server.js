@@ -56,9 +56,11 @@ const PORT = process.env.PORT || 5001;
       console.log("✅ Base de datos sincronizada (sin borrar tablas).");
     }
 
-    app.listen(PORT, () => {
-      console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+    // 🔥 CORRECCIÓN IMPORTANTE PARA DEPLOY
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
     });
+
   } catch (error) {
     console.error("❌ Error al conectar con la base de datos:", error);
   }
