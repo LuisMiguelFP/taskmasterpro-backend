@@ -1,23 +1,16 @@
 {
-  "name": "backend",
+  "name": "frontend",
   "version": "1.0.0",
-  "type": "module",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+   
+    "build": "chmod +x node_modules/.bin/vite && vite build" 
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.6.1",
-    "express": "^4.22.1",
-    "express-validator": "^6.14.2",
-    "jsonwebtoken": "^9.0.0",
-    "pg": "^8.16.3",
-    "pg-hstore": "^2.3.4",
-    "sequelize": "^6.31.0"
+    
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    
   }
 }
