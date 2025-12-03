@@ -15,13 +15,17 @@ dotenv.config();
 
 const app = express();
 
-// Middlewares
+// 🔥 CORS CONFIG PRODUCCIÓN + LOCAL
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: [
+      process.env.FRONTEND_URL,      // Dominio de Vercel
+      "http://localhost:5173"        // Entorno local
+    ].filter(Boolean),               // elimina undefined
     credentials: true,
   })
 );
+
 app.use(express.json());
 
 // Relaciones
