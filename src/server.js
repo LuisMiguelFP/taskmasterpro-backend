@@ -16,16 +16,31 @@ dotenv.config();
 const app = express();
 
 
-// 🔥 CORS CONFIG PRODUCCIÓN + LOCAL
+// ----------------------------------------------------
+// 🔥 CORS CONFIG CORREGIDA PARA MÚLTIPLES ORÍGENES 🔥
+// ----------------------------------------------------
+
+// 1. Obtiene la variable de entorno que contendrá las URLs separadas por comas.
+const frontendUrls = process.env.FRONTEND_URL;
+
+// 2. Procesa la cadena: la divide por comas, elimina espacios y URLs vacías (falsy values).
+const allowedOrigins = frontendUrls 
+  ? frontendUrls.split(',').map(url => url.trim()).filter(Boolean) 
+  : []; // Inicializa como un array vacío si la variable no está definida.
+
+// 3. Añade el entorno local explícitamente para desarrollo.
+allowedOrigins.push("http://localhost:5173"); 
+
+
 app.use(
   cors({
-    origin: [
-      process.env.FRONTEND_URL,      // Dominio de Vercel (tomado de Railway)
-      "http://localhost:5173"        // Entorno local
-    ].filter(Boolean),              // Asegura que no haya entradas falsas
+    origin: allowedOrigins,
     credentials: true,
   })
 );
+// ----------------------------------------------------
+// ----------------------------------------------------
+
 
 app.use(express.json());
 
