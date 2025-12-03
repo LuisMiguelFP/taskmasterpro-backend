@@ -15,8 +15,6 @@ dotenv.config();
 
 const app = express();
 
-// 🔥 La variable FRONTEND_URL ya debe estar definida en Railway
-// Ejemplo: FRONTEND_URL = https://[tu-dominio-de-vercel].vercel.app
 
 // 🔥 CORS CONFIG PRODUCCIÓN + LOCAL
 app.use(
