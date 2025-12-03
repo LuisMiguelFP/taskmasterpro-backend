@@ -34,7 +34,7 @@ allowedOrigins.push("http://localhost:5173");
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin:"*",
     credentials: true,
   })
 );
