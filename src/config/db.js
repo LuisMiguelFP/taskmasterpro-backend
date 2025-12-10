@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Detectar si la base requiere SSL (Railway, Supabase, Neon)
-const sslConfig = process.env.DB_SSL === "true" 
+const sslConfig = process.env.DB_SSL === "true"
   ? {
       ssl: {
         require: true,
